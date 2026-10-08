@@ -1,0 +1,21 @@
+{
+  "name": "ads",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voltaikai/ads.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/voltaikai/ads/issues"
+  },
+  "homepage": "https://github.com/voltaikai/ads#readme",
+  "private": true,
+  "devDependencies": {
+    "hyperframes": "^0.8.140"
+  }
+}
