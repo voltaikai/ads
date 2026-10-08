@@ -4,3 +4,5 @@ videos/*/public/input-video.mp4
 videos/*/output.mp4
 videos/*/audio.mp3
 videos/*/public/snapshots/
+videos/*/work-*/
+videos/*/.output.hf-transaction-*/
