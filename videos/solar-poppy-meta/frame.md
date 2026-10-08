@@ -33,7 +33,7 @@ spacing_px:
   stack-gap-sub: 24      # headline -> subline
 safe_zone_px: { top: 250, bottom: 1270 }     # nothing above 250 or below 1270 (Meta UI)
 zones_px:
-  card-over-footage: [900, 1170]   # glass cards on talking-head shots (face sits ~110-860)
+  card-over-footage: [900, 1170]   # glass cards on talking-head shots (face sits ~70-900)
   subtitles: [1190, 1270]          # line centre ~1230 (64% down)
 glass:
   fill: "rgba(19,48,74,0.42)"      # navy at 42%
@@ -70,7 +70,7 @@ gold edge of sun, and calm, overlapping motion. Think product film, not infomerc
 ## The frame
 
 - 1080x1920. Content lives between y=250 and y=1270. Text stacks are left-aligned at x=90.
-- Talking-head shots: the A-roll is framed 200px higher than shot (face ~y 110–860) with a navy
+- Talking-head shots: the A-roll is framed 280px higher than shot (face ~y 70–900) with a navy
   fade at the foot (inside Meta's bottom UI zone), so glass cards own y 900–1170 and never
   touch the face. Subtitles sit at y 1190–1270 on every shot.
 - Cutaways: solid navy plus one burnt-orange radial glow (12%) in the top-right corner,

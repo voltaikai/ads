@@ -13,3 +13,4 @@ videos/*/work/
 .claude/skills/
 skills-lock.json
 videos/*/review/*.mp4
+videos/*/snapshots/

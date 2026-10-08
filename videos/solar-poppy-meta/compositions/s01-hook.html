@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/brand.css" />
+      <style>
+        #s01-hook {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        #s01-hook .card {
+          position: absolute;
+          left: 54px;
+          top: 934px;
+          width: 782px;
+          padding: var(--card-pad-y) var(--card-pad-x);
+        }
+        #s01-hook .eyebrow {
+          margin-bottom: 18px;
+        }
+        #s01-hook .headline {
+          font-size: 72px;
+          white-space: nowrap;
+        }
+      </style>
+
+      <div id="s01-hook" data-composition-id="s01-hook" data-width="1080" data-height="1920" data-duration="6.7">
+        <div class="card glass" id="s01-card">
+          <div class="sweep" id="s01-sweep"></div>
+          <div class="eyebrow" id="s01-eyebrow">Bakersfield homeowners</div>
+          <div class="headline" id="s01-headline">
+            <span class="w">Bills </span><span class="w">went </span><span class="w accent">up </span><span class="w accent">again.</span>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          // eyebrow "settles": each glyph starts spread as if tracked at 0.6em and closes to 0.3em
+          function glyphs(el) {
+            var t = el.textContent;
+            el.textContent = "";
+            for (var i = 0; i < t.length; i++) {
+              var c = document.createElement("span");
+              c.className = "ch";
+              c.textContent = t[i];
+              el.appendChild(c);
+            }
+            return el.querySelectorAll(".ch");
+          }
+          var eyebrowChars = glyphs(document.getElementById("s01-eyebrow"));
+          var SPREAD = 0.3 * 24; // extra 0.3em per glyph at 24px
+
+          var tl = gsap.timeline({ paused: true });
+          var words = document.querySelectorAll("#s01-headline .w");
+          var accent = document.querySelectorAll("#s01-headline .accent");
+
+          // card lands: scale .94 → 1, fade, blur 12 → 0, rise 40
+          tl.fromTo(
+            "#s01-card",
+            { opacity: 0, y: 40, scale: 0.94, filter: "blur(12px)" },
+            { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.85, ease: "expo.out" },
+            0.1,
+          );
+          // eyebrow settles: tracking 0.6em → 0.3em while fading in
+          tl.fromTo(
+            eyebrowChars,
+            { opacity: 0, x: function (i) { return i * SPREAD; } },
+            { opacity: 1, x: 0, duration: 0.8, ease: "expo.out" },
+            0.32,
+          );
+          // headline word by word; the orange words land last
+          tl.fromTo(
+            words,
+            { opacity: 0, y: 30, filter: "blur(10px)" },
+            { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "expo.out", stagger: 0.07 },
+            0.52,
+          );
+          // soft gold glow pulse on the accent, on the spoken "up again"
+          tl.fromTo(
+            accent,
+            { textShadow: "0 0 0px rgba(255,210,122,0)" },
+            { textShadow: "0 0 26px rgba(255,210,122,0.55)", duration: 0.35, ease: "power2.out" },
+            1.22,
+          );
+          tl.to(accent, { textShadow: "0 0 0px rgba(255,210,122,0)", duration: 1.0, ease: "power2.inOut" }, 1.57);
+          // one slow diagonal light sweep once the card has landed
+          tl.set("#s01-sweep", { opacity: 1, xPercent: -110 }, 1.5);
+          tl.to("#s01-sweep", { xPercent: 260, duration: 0.9, ease: "power2.inOut" }, 1.5);
+          tl.set("#s01-sweep", { opacity: 0 }, 2.41);
+
+          window.__timelines["s01-hook"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

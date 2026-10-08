@@ -32,7 +32,8 @@ video, not a loud infomercial", and unmistakably on-brand with the Solar Poppy m
 - Synthesized SFX only (sfx/): airy whoosh, soft tick, rising tone, power-on chime. No music.
 - Word-by-word subtitles (Montserrat 700), on for the whole video.
 - Style test: render the first 8 seconds and wait for approval before the full build.
-- Render "both aspect ratios" (second ratio to confirm with the user).
+- 9:16 only (user confirmed; no second aspect ratio).
+- Storyboard approved by the user.
 
 ## Notes
 
