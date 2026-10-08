@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1440" width="1440" height="1440">
+  <!-- Solar Poppy mark, rebuilt from the original PNG (same 1440 coordinate space).
+       Every part is its own element so it can animate independently.
+       Petals share one path (4-fold symmetry), rotated about the centre (720,720). -->
+  <defs>
+    <path id="sp-petal-shape" d="M720 349C806 370 843 443.5 843 505.5A123 164.8 0 0 1 827.3 586L720 815.8L612.7 586A123 164.8 0 0 1 597 505.5C597 443.5 634 370 720 349Z"/>
+    <clipPath id="sp-petal-clip"><use href="#sp-petal-shape"/></clipPath>
+  </defs>
+  <rect id="sp-bg" width="1440" height="1440" fill="#13304A"/>
+  <circle id="sp-disc" cx="720" cy="720" r="560" fill="#FFFFFF"/>
+  <g id="sp-petals">
+    <g id="sp-petal-top" class="sp-petal">
+      <use class="sp-petal-fill" href="#sp-petal-shape" fill="#F7941D"/>
+      <g class="sp-grid" clip-path="url(#sp-petal-clip)" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="14" fill="none">
+        <line x1="720" y1="340" x2="720" y2="680"/>
+        <line x1="590" y1="472.5" x2="850" y2="472.5"/>
+        <line x1="590" y1="585" x2="850" y2="585"/>
+      </g>
+    </g>
+    <g id="sp-petal-right" class="sp-petal" transform="rotate(90 720 720)">
+      <use class="sp-petal-fill" href="#sp-petal-shape" fill="#E2711D"/>
+      <g class="sp-grid" clip-path="url(#sp-petal-clip)" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="14" fill="none">
+        <line x1="720" y1="340" x2="720" y2="680"/>
+        <line x1="590" y1="472.5" x2="850" y2="472.5"/>
+        <line x1="590" y1="585" x2="850" y2="585"/>
+      </g>
+    </g>
+    <g id="sp-petal-bottom" class="sp-petal" transform="rotate(180 720 720)">
+      <use class="sp-petal-fill" href="#sp-petal-shape" fill="#F7941D"/>
+      <g class="sp-grid" clip-path="url(#sp-petal-clip)" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="14" fill="none">
+        <line x1="720" y1="340" x2="720" y2="680"/>
+        <line x1="590" y1="472.5" x2="850" y2="472.5"/>
+        <line x1="590" y1="585" x2="850" y2="585"/>
+      </g>
+    </g>
+    <g id="sp-petal-left" class="sp-petal" transform="rotate(270 720 720)">
+      <use class="sp-petal-fill" href="#sp-petal-shape" fill="#E2711D"/>
+      <g class="sp-grid" clip-path="url(#sp-petal-clip)" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="14" fill="none">
+        <line x1="720" y1="340" x2="720" y2="680"/>
+        <line x1="590" y1="472.5" x2="850" y2="472.5"/>
+        <line x1="590" y1="585" x2="850" y2="585"/>
+      </g>
+    </g>
+  </g>
+  <circle id="sp-ring" cx="720" cy="720" r="129" fill="#FFFFFF"/>
+  <circle id="sp-core" cx="720" cy="720" r="106.5" fill="#13304A"/>
+  <path id="sp-bolt" d="M747.5 641L736 641L675.5 731L720 731L698 797.5L765 709.5L719.5 709.5Z" fill="#FFD27A"/>
+</svg>

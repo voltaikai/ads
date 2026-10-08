@@ -6,3 +6,9 @@ videos/*/audio.mp3
 videos/*/public/snapshots/
 videos/*/work-*/
 videos/*/.output.hf-transaction-*/
+videos/*/source/*.mp4
+videos/*/assets/aroll-trimmed.mp4
+videos/*/work/
+.agents/
+.claude/skills/
+skills-lock.json
