@@ -12,3 +12,4 @@ videos/*/work/
 .agents/
 .claude/skills/
 skills-lock.json
+videos/*/review/*.mp4
