@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face { font-family: "Montserrat"; src: url("fonts/montserrat-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Montserrat"; src: url("fonts/montserrat-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Montserrat"; src: url("fonts/montserrat-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Montserrat"; src: url("fonts/montserrat-latin-800-normal.woff2") format("woff2"); font-weight: 800; font-display: block; }
+      @font-face { font-family: "Montserrat"; src: url("fonts/montserrat-latin-900-normal.woff2") format("woff2"); font-weight: 900; font-display: block; }
+      @font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque-latin-800-normal.woff2") format("woff2"); font-weight: 800; font-display: block; }
+
+      :root {
+        --gold: #f2bb46;
+        --sky: #5da5d1;
+        --steel: #31587d;
+        --navy: #092f56;
+        --cream: #f7f5e5;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%; height: 100%; overflow: hidden; background: #092f56;
+        font-family: "Montserrat", sans-serif; color: #f7f5e5;
+      }
+      #stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+      /* ── video ── */
+      #video-wrap { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; }
+      #video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+      #vignette {
+        position: absolute; inset: 0; pointer-events: none;
+        background: linear-gradient(180deg, rgba(9,47,86,0) 55%, rgba(9,47,86,0.55) 100%);
+      }
+
+      /* ── shared glass language ── */
+      .glass {
+        background: linear-gradient(140deg, rgba(247,245,229,0.26) 0%, rgba(247,245,229,0.07) 100%);
+        backdrop-filter: blur(26px) saturate(150%);
+        -webkit-backdrop-filter: blur(26px) saturate(150%);
+        border: 2px solid rgba(247,245,229,0.42);
+        box-shadow: 0 30px 80px rgba(4,22,42,0.45), inset 0 2px 0 rgba(255,255,255,0.35);
+        border-radius: 44px;
+      }
+      .glass-dark {
+        background: linear-gradient(140deg, rgba(49,88,125,0.62) 0%, rgba(9,47,86,0.58) 100%);
+        backdrop-filter: blur(30px) saturate(140%);
+        -webkit-backdrop-filter: blur(30px) saturate(140%);
+        border: 2px solid rgba(247,245,229,0.38);
+        box-shadow: 0 30px 80px rgba(4,22,42,0.5), inset 0 2px 0 rgba(255,255,255,0.28);
+        border-radius: 44px;
+      }
+      .kicker {
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 30px;
+        letter-spacing: 0.18em; text-transform: uppercase; color: var(--sky);
+      }
+      .display { font-family: "Bricolage Grotesque", "Montserrat", sans-serif; font-weight: 800; line-height: 0.92; letter-spacing: -0.02em; }
+      .abs { position: absolute; }
+
+      /* glass icon: solid back shape + frosted front tile (graphics5 language) */
+      .gi { position: absolute; width: 150px; height: 150px; }
+      .gi .b { position: absolute; border-radius: 40px; }
+      .gi .f {
+        position: absolute; left: 0; top: 18px; width: 118px; height: 118px; border-radius: 34px;
+        background: linear-gradient(140deg, rgba(247,245,229,0.55), rgba(247,245,229,0.22));
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border: 2px solid rgba(255,255,255,0.65);
+        box-shadow: inset 0 2px 0 rgba(255,255,255,0.6);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .gi .f svg { width: 64px; height: 64px; }
+      .gi .b.circ { border-radius: 50%; }
+
+      /* ── clips ── */
+      .card-host, .broll { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; overflow: hidden; }
+      .in { position: absolute; inset: 0; opacity: 0; }
+
+      /* B-roll backdrop */
+      .bg { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 20%, #12497a 0%, #092f56 55%, #061f3a 100%); }
+      .grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(247,245,229,0.06) 2px, transparent 2px),
+          linear-gradient(90deg, rgba(247,245,229,0.06) 2px, transparent 2px);
+        background-size: 108px 108px;
+      }
+      .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.85; }
+
+      /* ── captions ── */
+      #captions { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
+      .cap {
+        position: absolute; left: 60px; width: 960px; top: 1405px; text-align: center; opacity: 0;
+      }
+      .cap .pill {
+        display: inline-block; padding: 18px 34px 22px; border-radius: 36px;
+        background: linear-gradient(140deg, rgba(9,47,86,0.55), rgba(9,47,86,0.35));
+        backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+        border: 2px solid rgba(247,245,229,0.3);
+        box-shadow: 0 18px 50px rgba(4,22,42,0.35);
+      }
+      .cap .w {
+        display: inline-block; margin: 0 15px;
+        font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 68px; line-height: 1.1;
+        text-transform: uppercase; color: #f7f5e5; letter-spacing: 0.005em;
+        text-shadow: 0 4px 18px rgba(4,22,42,0.45);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage" data-composition-id="bakersfield-solar" data-start="0" data-duration="49.1667" data-fps="30" data-width="1080" data-height="1920">
+
+      <!-- ═════ Layer 1: talking-head footage (plays untouched) ═════ -->
+      <div id="video-wrap">
+        <video id="bg-video" src="input-video.mp4" playsinline data-has-audio="true" data-start="0" data-duration="49.1667" data-track-index="1"></video>
+        <div id="vignette"></div>
+      </div>
+
+      <!-- ═════ O1 · hook: the bill went up ═════ -->
+      <div class="card-host clip" id="o1" data-start="0.4" data-duration="3.0" data-track-index="2">
+        <div class="in" id="o1-in">
+          <div class="glass-dark abs" id="o1-card" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:90px; top:960px; width:900px; height:300px;">
+            <div class="gi" style="left:50px; top:60px;">
+              <div class="b" style="left:44px; top:0; width:104px; height:118px; background:var(--steel);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6h32v52l-8-5-8 5-8-5-8 5z"/><path d="M24 22h16M24 32h16M24 42h9"/></svg></div>
+            </div>
+            <div class="abs kicker" style="left:230px; top:70px;">Your electric bill</div>
+            <div class="abs display" style="left:230px; top:118px; font-size:96px; color:var(--cream);">Went up</div>
+            <div class="abs" id="o1-badge" style="left:700px; top:-46px; width:170px; height:170px; border-radius:50%; background:var(--gold); box-shadow:0 18px 50px rgba(242,187,70,0.55); display:flex; align-items:center; justify-content:center; flex-direction:column;">
+              <svg viewBox="0 0 64 64" style="width:64px;height:64px" fill="none" stroke="#092f56" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M32 54V12M14 30l18-18 18 18"/></svg>
+              <div style="font-weight:900; font-size:26px; color:#092f56; letter-spacing:0.06em;">AGAIN</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B1 · bills climb every single month ═════ -->
+      <div class="broll clip" id="b1" data-start="3.6" data-duration="4.75" data-track-index="3">
+        <div class="in" id="b1-in">
+          <div class="bg"></div>
+          <div class="blob" id="b1-blob1" style="left:-180px; top:120px; width:620px; height:620px; background:var(--sky); opacity:0.55;"></div>
+          <div class="blob" id="b1-blob2" style="left:640px; top:900px; width:560px; height:560px; background:var(--gold); opacity:0.35;"></div>
+          <div class="grid"></div>
+
+          <div class="glass abs" id="b1-chip" style="left:290px; top:230px; width:500px; height:96px; border-radius:48px; display:flex; align-items:center; justify-content:center; gap:16px;">
+            <svg viewBox="0 0 64 64" style="width:46px;height:46px" fill="var(--gold)"><path d="M32 4C20 4 11 13 11 25c0 15 21 35 21 35s21-20 21-35C53 13 44 4 32 4zm0 29a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+            <span style="font-weight:800; font-size:36px; letter-spacing:0.12em;">BAKERSFIELD</span>
+          </div>
+
+          <div class="abs" id="b1-small" style="left:0; width:1080px; top:390px; text-align:center; font-weight:600; font-size:58px; color:var(--cream);">PG&amp;E bills keep</div>
+          <div class="abs display" id="b1-big" style="left:0; width:1080px; top:470px; text-align:center; font-size:200px; color:var(--gold);">climbing</div>
+
+          <div class="glass abs" id="b1-chart" style="left:90px; top:760px; width:900px; height:520px;">
+            <div class="abs kicker" style="left:50px; top:40px; color:var(--cream); opacity:0.8;">Monthly bill</div>
+            <div class="abs" id="b1-every" style="left:560px; top:26px; padding:12px 26px; border-radius:30px; background:var(--gold); color:var(--navy); font-weight:900; font-size:30px; letter-spacing:0.08em;">EVERY MONTH</div>
+            <div id="b1-bars" class="abs" style="left:50px; top:110px; width:800px; height:330px;"></div>
+            <div id="b1-months" class="abs" style="left:50px; top:452px; width:800px; height:40px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ O2 · it's not your usage ═════ -->
+      <div class="card-host clip" id="o2" data-start="8.45" data-duration="2.3" data-track-index="2">
+        <div class="in" id="o2-in">
+          <div class="glass-dark abs" id="o2-card" style="left:90px; top:1040px; width:900px; height:200px;">
+            <div class="gi" style="left:40px; top:24px;">
+              <div class="b circ" style="left:52px; top:0; width:96px; height:96px; background:var(--sky);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="#092f56"><path d="M36 4 12 36h16l-4 24 24-32H32z"/></svg></div>
+            </div>
+            <div class="abs kicker" style="left:220px; top:44px;">The problem isn't</div>
+            <div class="abs" style="left:220px; top:88px; font-weight:800; font-size:58px; white-space:nowrap;">Using more power</div>
+            <div class="abs" id="o2-strike" style="left:214px; top:124px; width:0; height:10px; border-radius:5px; background:var(--gold);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B2 · rates keep RISING ═════ -->
+      <div class="broll clip" id="b2" data-start="10.8" data-duration="1.95" data-track-index="3">
+        <div class="in" id="b2-in">
+          <div class="bg"></div>
+          <div class="blob" id="b2-blob1" style="left:480px; top:-120px; width:700px; height:700px; background:var(--gold); opacity:0.4;"></div>
+          <div class="blob" style="left:-200px; top:1000px; width:640px; height:640px; background:var(--sky); opacity:0.45;"></div>
+          <div class="grid"></div>
+          <div class="abs" id="b2-small" style="left:0; width:1080px; top:250px; text-align:center; font-weight:600; font-size:64px;">Rates keep</div>
+          <div class="abs display" id="b2-rising" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:0; width:1080px; top:330px; text-align:center; font-size:250px; color:var(--gold);">RISING</div>
+          <div class="glass abs" id="b2-chart" style="left:110px; top:640px; width:860px; height:640px;">
+            <div class="abs kicker" style="left:50px; top:44px; color:var(--cream);">Electric rates</div>
+            <svg class="abs" style="left:30px; top:110px; width:800px; height:480px;" viewBox="0 0 800 480" fill="none">
+              <path d="M40 440 H760 M40 330 H760 M40 220 H760 M40 110 H760" stroke="rgba(247,245,229,0.12)" stroke-width="2"/>
+              <path id="b2-area" d="M40 400 C140 380 180 330 260 340 S380 260 450 250 S560 190 620 150 S700 70 740 50 L740 440 L40 440 Z" fill="url(#b2grad)" opacity="0"/>
+              <defs><linearGradient id="b2grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2bb46" stop-opacity="0.45"/><stop offset="1" stop-color="#f2bb46" stop-opacity="0"/></linearGradient></defs>
+              <path id="b2-line" d="M40 400 C140 380 180 330 260 340 S380 260 450 250 S560 190 620 150 S700 70 740 50" stroke="#f7f5e5" stroke-width="10" stroke-linecap="round" style="filter: drop-shadow(0 0 14px rgba(247,245,229,0.9));"/>
+              <path id="b2-arrow" d="M700 46 L748 44 L736 92" stroke="#f7f5e5" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ O3 · fixed income / budget / adds up fast ═════ -->
+      <div class="card-host clip" id="o3" data-start="12.75" data-duration="4.75" data-track-index="2">
+        <div class="in" id="o3-in" style="opacity:1;">
+          <div class="glass-dark abs" id="o3-c1" style="left:90px; top:1000px; width:430px; height:250px; opacity:0;">
+            <div class="gi" style="left:36px; top:30px; transform-origin:center;">
+              <div class="b" style="left:46px; top:0; width:100px; height:80px; background:var(--gold);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="16" width="48" height="36" rx="8"/><path d="M40 34h8"/></svg></div>
+            </div>
+            <div class="abs" style="left:36px; top:178px; font-weight:800; font-size:40px;">Fixed income</div>
+          </div>
+          <div class="glass-dark abs" id="o3-c2" style="left:560px; top:1000px; width:430px; height:250px; opacity:0;">
+            <div class="gi" style="left:36px; top:30px;">
+              <div class="b" style="left:50px; top:6px; width:96px; height:110px; background:var(--sky);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round"><path d="M14 18h12M20 12v12M38 18h12M14 44h12M38 40h12M38 48h12"/></svg></div>
+            </div>
+            <div class="abs" style="left:36px; top:178px; font-weight:800; font-size:40px;">Tight budget</div>
+          </div>
+          <!-- increases stacking up -->
+          <div id="o3-stack" class="abs" style="left:0; top:0; width:1080px; height:1920px;">
+            <div class="glass abs o3-plus" id="o3-p1" style="left:610px; top:1250px; width:380px; height:110px; border-radius:30px; opacity:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:46px; color:var(--gold); white-space:nowrap;">+ increase</div>
+            <div class="glass abs o3-plus" id="o3-p2" style="left:610px; top:1125px; width:380px; height:110px; border-radius:30px; opacity:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:46px; color:var(--gold); white-space:nowrap;">+ increase</div>
+            <div class="glass abs o3-plus" id="o3-p3" style="left:610px; top:1000px; width:380px; height:110px; border-radius:30px; opacity:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:46px; color:var(--gold); white-space:nowrap;">+ increase</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B3 · you don't have to accept rate hikes ═════ -->
+      <div class="broll clip" id="b3" data-start="17.55" data-duration="3.85" data-track-index="3">
+        <div class="in" id="b3-in">
+          <div class="bg"></div>
+          <div class="blob" id="b3-blob1" style="left:-160px; top:260px; width:640px; height:640px; background:var(--steel); opacity:0.9;"></div>
+          <div class="blob" id="b3-blob2" style="left:560px; top:820px; width:600px; height:600px; background:var(--sky); opacity:0.6;"></div>
+          <div class="blob" style="left:700px; top:160px; width:300px; height:300px; background:var(--gold); opacity:0.45;"></div>
+          <div class="grid"></div>
+          <div class="glass abs" id="b3-card" style="left:110px; top:250px; width:860px; height:1040px;">
+            <div class="abs" style="left:60px; top:56px; font-weight:700; font-size:30px;">Most people</div>
+            <div class="abs" style="left:60px; top:92px; font-weight:500; font-size:30px; opacity:0.7;">don't realize</div>
+            <div class="abs" style="left:560px; top:70px; font-style:italic; font-weight:500; font-size:30px; opacity:0.8;">Here's the thing</div>
+            <div class="abs display b3-line" id="b3-l1" style="left:60px; top:250px; font-size:118px; color:var(--cream);">You don't</div>
+            <div class="abs display b3-line" id="b3-l2" style="left:60px; top:370px; font-size:118px; color:var(--cream);">have to</div>
+            <div class="abs display b3-line" id="b3-l3" style="left:60px; top:490px; font-size:118px; color:var(--cream);">accept</div>
+            <div class="abs display b3-line" id="b3-l4" style="left:60px; top:610px; font-size:118px; color:var(--gold);">rate hikes.</div>
+            <!-- toggle -->
+            <div class="abs" id="b3-toggle-wrap" style="left:60px; top:850px; width:740px; height:120px;">
+              <div class="abs" style="left:0; top:34px; font-weight:700; font-size:44px;">Accept rate hikes</div>
+              <div class="abs" id="b3-track" style="left:540px; top:10px; width:200px; height:100px; border-radius:50px; background:var(--gold); border:2px solid rgba(255,255,255,0.6);"></div>
+              <div class="abs" id="b3-knob" style="left:640px; top:16px; width:88px; height:88px; border-radius:50%; background:linear-gradient(140deg, rgba(255,255,255,0.95), rgba(247,245,229,0.75)); box-shadow:0 8px 20px rgba(4,22,42,0.35);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ O4 · available for years → homeowners choosing it now ═════ -->
+      <div class="card-host clip" id="o4" data-start="21.45" data-duration="5.0" data-track-index="2">
+        <div class="in" id="o4-in" style="opacity:1;">
+          <div class="glass-dark abs" id="o4-chip" style="left:150px; top:1080px; width:780px; height:150px; border-radius:75px; opacity:0;">
+            <div class="abs" style="left:24px; top:21px; width:108px; height:108px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 64 64" style="width:60px;height:60px" fill="none" stroke="#092f56" stroke-width="6" stroke-linecap="round"><circle cx="32" cy="32" r="24"/><path d="M32 18v15l10 6"/></svg>
+            </div>
+            <div class="abs" style="left:160px; top:24px; font-weight:600; font-size:30px; color:var(--sky); letter-spacing:0.1em;">AN OPTION</div>
+            <div class="abs" style="left:160px; top:60px; font-weight:800; font-size:54px;">Available for years</div>
+          </div>
+          <div class="glass-dark abs" id="o4-card" style="left:90px; top:930px; width:900px; height:380px; opacity:0;">
+            <div class="abs kicker" style="left:50px; top:38px; color:var(--cream);">Bakersfield homeowners</div>
+            <div id="o4-people" class="abs" style="left:50px; top:96px; width:800px; height:180px;"></div>
+            <div class="abs" id="o4-now" style="left:50px; top:290px; height:64px; padding:0 30px; border-radius:32px; background:var(--gold); color:var(--navy); font-weight:900; font-size:32px; letter-spacing:0.06em; display:flex; align-items:center; opacity:0;">CHOOSING IT RIGHT NOW</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B4 · SOLAR: your own power vs the grid ═════ -->
+      <div class="broll clip" id="b4" data-start="26.45" data-duration="3.7" data-track-index="3">
+        <div class="in" id="b4-in">
+          <div class="bg"></div>
+          <div class="blob" id="b4-sunglow" style="left:-60px; top:480px; width:620px; height:620px; background:var(--gold); opacity:0.5;"></div>
+          <div class="blob" style="left:600px; top:1000px; width:600px; height:600px; background:var(--sky); opacity:0.4;"></div>
+          <div class="grid"></div>
+          <div class="abs display" id="b4-solar" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:0; width:1080px; top:220px; text-align:center; font-size:270px; color:var(--gold);">SOLAR</div>
+          <div class="abs" id="b4-sub" style="left:0; width:1080px; top:500px; text-align:center; font-weight:700; font-size:50px;">Generate your own power</div>
+
+          <svg class="abs" style="left:0; top:0; width:1080px; height:1920px;" viewBox="0 0 1080 1920" fill="none">
+            <path id="b4-flow" d="M250 760 C330 820 400 880 470 950" stroke="#f2bb46" stroke-width="12" stroke-linecap="round" stroke-dasharray="4 26" style="filter: drop-shadow(0 0 10px rgba(242,187,70,0.9));"/>
+            <path id="b4-gridline" d="M830 760 C750 820 680 880 610 950" stroke="#5da5d1" stroke-width="12" stroke-linecap="round"/>
+          </svg>
+
+          <!-- sun -->
+          <div class="gi" id="b4-sun" style="left:110px; top:610px; width:190px; height:190px;">
+            <div class="b circ" style="left:58px; top:0; width:130px; height:130px; background:var(--gold);"></div>
+            <div class="f" style="width:150px; height:150px; top:30px; border-radius:42px;"><svg viewBox="0 0 64 64" style="width:84px;height:84px" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round"><circle cx="32" cy="32" r="11"/><path d="M32 6v7M32 51v7M6 32h7M51 32h7M13.6 13.6l5 5M45.4 45.4l5 5M13.6 50.4l5-5M45.4 18.6l5-5"/></svg></div>
+          </div>
+          <!-- house -->
+          <div class="gi" id="b4-house" style="left:430px; top:930px; width:230px; height:230px;">
+            <div class="b" style="left:70px; top:0; width:160px; height:150px; background:var(--steel);"></div>
+            <div class="f" style="width:190px; height:190px; top:36px; border-radius:50px;"><svg viewBox="0 0 64 64" style="width:110px;height:110px" fill="none" stroke="#092f56" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 30 32 10l24 20"/><path d="M14 26v28h36V26"/><path d="M27 54V40h10v14"/><path d="M20 30l8-6 8 6M40 22l6 5" stroke="#f2bb46"/></svg></div>
+          </div>
+          <!-- grid tower -->
+          <div class="gi" id="b4-tower" style="left:770px; top:610px; width:190px; height:190px;">
+            <div class="b" style="left:58px; top:0; width:130px; height:120px; background:var(--sky);"></div>
+            <div class="f" style="width:150px; height:150px; top:30px; border-radius:42px;"><svg viewBox="0 0 64 64" style="width:84px;height:84px" fill="none" stroke="#092f56" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 58 32 6l10 52M26 38h12M24 48h16M14 18h36M18 26h28"/></svg></div>
+          </div>
+          <div class="abs" id="b4-lbl1" style="left:70px; top:830px; width:280px; text-align:center; font-weight:800; font-size:34px; color:var(--gold);">Your power</div>
+          <div class="abs" id="b4-lbl2" style="left:730px; top:830px; width:280px; text-align:center; font-weight:800; font-size:34px; color:var(--sky);">The grid</div>
+          <div class="abs" id="b4-x" style="left:650px; top:780px; width:110px; height:110px; border-radius:50%; background:var(--navy); border:4px solid var(--gold); display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 64 64" style="width:56px;height:56px" fill="none" stroke="#f2bb46" stroke-width="9" stroke-linecap="round"><path d="M18 18l28 28M46 18 18 46"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B5 · lower bills / predictability / control ═════ -->
+      <div class="broll clip" id="b5" data-start="30.15" data-duration="4.95" data-track-index="3">
+        <div class="in" id="b5-in">
+          <div class="bg"></div>
+          <div class="blob" id="b5-blob1" style="left:-200px; top:300px; width:640px; height:640px; background:var(--sky); opacity:0.5;"></div>
+          <div class="blob" id="b5-blob2" style="left:620px; top:700px; width:560px; height:560px; background:var(--gold); opacity:0.32;"></div>
+          <div class="grid"></div>
+          <div class="abs" id="b5-head" style="left:110px; top:230px; width:860px;">
+            <div class="kicker">With solar</div>
+            <div class="display" style="font-size:110px; margin-top:12px;">That means</div>
+          </div>
+
+          <div class="glass abs" id="b5-c1" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:110px; top:480px; width:860px; height:240px;">
+            <div class="gi" style="left:44px; top:42px;">
+              <div class="b circ" style="left:52px; top:0; width:96px; height:96px; background:var(--gold);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M32 10v42M14 34l18 18 18-18"/></svg></div>
+            </div>
+            <div class="abs" style="left:240px; top:58px; font-weight:800; font-size:66px;">Lower bills</div>
+            <div class="abs" style="left:240px; top:140px; font-weight:500; font-size:34px; opacity:0.75;">Buy less from the grid</div>
+          </div>
+          <div class="glass abs" id="b5-c2" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:110px; top:760px; width:860px; height:240px;">
+            <div class="gi" style="left:44px; top:42px;">
+              <div class="b" style="left:52px; top:4px; width:96px; height:100px; background:var(--sky);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="14" width="44" height="40" rx="7"/><path d="M10 26h44M22 8v10M42 8v10"/><path d="M23 40l6 6 12-12" stroke="#f2bb46" stroke-width="6"/></svg></div>
+            </div>
+            <div class="abs" style="left:240px; top:58px; font-weight:800; font-size:66px;">Predictability</div>
+            <div class="abs" style="left:240px; top:140px; font-weight:500; font-size:34px; opacity:0.75;">Know what to expect</div>
+          </div>
+          <div class="glass abs" id="b5-c3" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:110px; top:1040px; width:860px; height:240px;">
+            <div class="gi" style="left:44px; top:42px;">
+              <div class="b" style="left:52px; top:0; width:96px; height:96px; background:var(--steel);"></div>
+              <div class="f"><svg viewBox="0 0 64 64" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round"><path d="M12 20h40M12 44h40"/><circle cx="24" cy="20" r="7" fill="#f2bb46"/><circle cx="42" cy="44" r="7" fill="#f2bb46"/></svg></div>
+            </div>
+            <div class="abs" style="left:240px; top:58px; font-weight:800; font-size:66px;">Real control</div>
+            <div class="abs" style="left:240px; top:140px; font-weight:500; font-size:34px; opacity:0.75;">Over your energy costs</div>
+            <div class="abs" id="b5-under" style="left:240px; top:184px; width:0; height:8px; border-radius:4px; background:var(--gold);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ O6 · no loans, no debt, no down payment ═════ -->
+      <div class="card-host clip" id="o6" data-start="35.2" data-duration="4.8" data-track-index="2">
+        <div class="in" id="o6-in">
+          <div class="glass-dark abs" id="o6-card" style="left:120px; top:900px; width:840px; height:450px;">
+            <div class="abs" style="left:50px; top:40px; height:56px; padding:0 26px; border-radius:28px; border:2px solid var(--gold); color:var(--gold); font-weight:800; font-size:28px; letter-spacing:0.12em; display:flex; align-items:center;">IF YOU QUALIFY</div>
+            <div class="abs o6-row" id="o6-r1" style="left:50px; top:130px; height:90px; display:flex; align-items:center; gap:28px; opacity:0;">
+              <div style="width:76px; height:76px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 64 64" style="width:46px;height:46px" fill="none" stroke="#092f56" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 33l12 12 24-26"/></svg></div>
+              <div style="font-weight:800; font-size:64px;">No loans</div>
+            </div>
+            <div class="abs o6-row" id="o6-r2" style="left:50px; top:230px; height:90px; display:flex; align-items:center; gap:28px; opacity:0;">
+              <div style="width:76px; height:76px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 64 64" style="width:46px;height:46px" fill="none" stroke="#092f56" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 33l12 12 24-26"/></svg></div>
+              <div style="font-weight:800; font-size:64px;">No debt</div>
+            </div>
+            <div class="abs o6-row" id="o6-r3" style="left:50px; top:330px; height:90px; display:flex; align-items:center; gap:28px; opacity:0;">
+              <div style="width:76px; height:76px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 64 64" style="width:46px;height:46px" fill="none" stroke="#092f56" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 33l12 12 24-26"/></svg></div>
+              <div style="font-weight:800; font-size:64px;">No down payment</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ B6 · first step: a free consultation ═════ -->
+      <div class="broll clip" id="b6" data-start="40.15" data-duration="5.35" data-track-index="3">
+        <div class="in" id="b6-in">
+          <div class="bg"></div>
+          <div class="blob" id="b6-blob1" style="left:500px; top:120px; width:640px; height:640px; background:var(--gold); opacity:0.38;"></div>
+          <div class="blob" id="b6-blob2" style="left:-220px; top:900px; width:640px; height:640px; background:var(--sky); opacity:0.5;"></div>
+          <div class="grid"></div>
+          <div class="glass abs" id="b6-step" style="left:110px; top:230px; width:280px; height:86px; border-radius:43px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:32px; letter-spacing:0.14em;">STEP 1</div>
+          <div class="abs display" id="b6-free" style="left:100px; top:340px; font-size:230px; color:var(--gold);">Free</div>
+          <div class="abs" id="b6-consult" style="left:110px; top:560px; font-weight:800; font-size:88px;">consultation</div>
+
+          <div class="glass abs" id="b6-card" style="left:110px; top:740px; width:860px; height:540px;">
+            <!-- folder w/ bill (graphics2 language) -->
+            <div class="abs" style="left:50px; top:60px; width:300px; height:250px;">
+              <div class="abs" style="left:0; top:0; width:300px; height:230px; border-radius:30px; background:var(--steel);"></div>
+              <div class="abs" id="b6-paper" style="left:40px; top:-30px; width:180px; height:210px; border-radius:18px; background:var(--cream); box-shadow:0 10px 24px rgba(4,22,42,0.3);">
+                <div class="abs" style="left:24px; top:30px; width:120px; height:14px; border-radius:7px; background:var(--sky);"></div>
+                <div class="abs" style="left:24px; top:62px; width:130px; height:10px; border-radius:5px; background:rgba(9,47,86,0.25);"></div>
+                <div class="abs" style="left:24px; top:86px; width:100px; height:10px; border-radius:5px; background:rgba(9,47,86,0.25);"></div>
+                <div class="abs" style="left:24px; top:110px; width:118px; height:10px; border-radius:5px; background:rgba(9,47,86,0.25);"></div>
+                <div class="abs" id="b6-scan" style="left:10px; top:20px; width:160px; height:8px; border-radius:4px; background:var(--gold); box-shadow:0 0 18px rgba(242,187,70,0.9);"></div>
+              </div>
+              <div class="abs" style="left:0; top:90px; width:300px; height:160px; border-radius:30px; background:linear-gradient(140deg, rgba(247,245,229,0.5), rgba(247,245,229,0.18)); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:2px solid rgba(255,255,255,0.6);"></div>
+            </div>
+            <div class="abs" id="b6-t1" style="left:400px; top:80px; width:420px; font-weight:800; font-size:50px; line-height:1.1;">We look at your bill</div>
+            <div class="abs" id="b6-t2" style="left:50px; top:350px; width:760px; height:130px; border-radius:36px; background:rgba(242,187,70,0.18); border:2px solid var(--gold); display:flex; align-items:center; gap:26px; padding-left:30px;">
+              <div style="width:76px; height:76px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 64 64" style="width:46px;height:46px" fill="none" stroke="#092f56" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 33l12 12 24-26"/></svg></div>
+              <div style="font-weight:800; font-size:46px;">See what's possible</div>
+            </div>
+            <div class="abs b6-spark" id="b6-s1" style="left:760px; top:300px; width:46px; height:46px;"><svg viewBox="0 0 64 64" fill="#f2bb46"><path d="M32 2l7 23 23 7-23 7-7 23-7-23-23-7 23-7z"/></svg></div>
+            <div class="abs b6-spark" id="b6-s2" style="left:812px; top:376px; width:30px; height:30px;"><svg viewBox="0 0 64 64" fill="#f7f5e5"><path d="M32 2l7 23 23 7-23 7-7 23-7-23-23-7 23-7z"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ O7 · CTA: book today ═════ -->
+      <div class="card-host clip" id="o7" data-start="45.6" data-duration="3.5667" data-track-index="2">
+        <div class="in" id="o7-in">
+          <div class="glass-dark abs" id="o7-card" style="left:90px; top:930px; width:900px; height:400px;">
+            <div class="abs kicker" style="left:0; width:900px; top:44px; text-align:center; color:var(--cream);">Your first step</div>
+            <div class="abs" id="o7-btn" data-hf-motion-blur='{"samplesPerFrame": 8}' style="left:60px; top:100px; width:780px; height:150px; border-radius:75px; background:linear-gradient(180deg, #f6cb6a, #f2bb46); box-shadow:0 20px 50px rgba(242,187,70,0.5), inset 0 2px 0 rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center; gap:20px; color:var(--navy);">
+              <svg viewBox="0 0 64 64" style="width:56px;height:56px" fill="none" stroke="#092f56" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="14" width="44" height="40" rx="7"/><path d="M10 26h44M22 8v10M42 8v10"/></svg>
+              <span style="font-weight:900; font-size:46px; letter-spacing:0.01em;">Book a free consultation</span>
+            </div>
+            <div class="abs" id="o7-ripple" style="left:410px; top:135px; width:80px; height:80px; border-radius:50%; border:6px solid var(--cream); opacity:0;"></div>
+            <div class="abs" id="o7-tag" style="left:0; width:900px; top:296px; text-align:center; font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:48px; white-space:nowrap; color:var(--cream);">See what solar can do for your home</div>
+            <svg class="abs" id="o7-cursor" viewBox="0 0 64 64" style="left:700px; top:300px; width:90px; height:90px; filter:drop-shadow(0 8px 14px rgba(4,22,42,0.5));"><path d="M14 6v46l12-11 8 18 9-4-8-18h16z" fill="#f7f5e5" stroke="#092f56" stroke-width="3" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════ Layer 4: captions (built from the word-level transcript) ═════ -->
+      <div id="captions"></div>
+
+      <!-- ═════ SFX (no music) ═════ -->
+      <audio id="sfx-01" src="sfx/whoosh-short.mp3" data-start="0.5" data-duration="0.57" data-track-index="10" data-volume="0.4"></audio>
+      <audio id="sfx-02" src="sfx/pop.mp3" data-start="1.5" data-duration="0.72" data-track-index="11" data-volume="0.5"></audio>
+      <audio id="sfx-03" src="sfx/whoosh.mp3" data-start="3.5" data-duration="0.57" data-track-index="10" data-volume="0.45"></audio>
+      <audio id="sfx-04" src="sfx/pop.mp3" data-start="3.85" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-05" src="sfx/whoosh-short.mp3" data-start="6.45" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-06" src="sfx/pop.mp3" data-start="7.8" data-duration="0.72" data-track-index="11" data-volume="0.5"></audio>
+      <audio id="sfx-07" src="sfx/whoosh-short.mp3" data-start="8.3" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-08" src="sfx/click.mp3" data-start="9.05" data-duration="0.37" data-track-index="12" data-volume="0.6"></audio>
+      <audio id="sfx-09" src="sfx/riser.mp3" data-start="10.8" data-duration="1.27" data-media-start="8.76" data-track-index="13" data-volume="0.35"></audio>
+      <audio id="sfx-10" src="sfx/impact-bass-1.mp3" data-start="12.07" data-duration="2.1" data-track-index="14" data-volume="0.22"></audio>
+      <audio id="sfx-11" src="sfx/whoosh-short.mp3" data-start="12.7" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-12" src="sfx/pop.mp3" data-start="13.2" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-13" src="sfx/pop.mp3" data-start="13.94" data-duration="0.72" data-track-index="12" data-volume="0.45"></audio>
+      <audio id="sfx-14" src="sfx/pop.mp3" data-start="16.41" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-15" src="sfx/pop.mp3" data-start="16.68" data-duration="0.72" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sfx-16" src="sfx/pop.mp3" data-start="16.86" data-duration="0.72" data-track-index="13" data-volume="0.55"></audio>
+      <audio id="sfx-17" src="sfx/whoosh.mp3" data-start="17.45" data-duration="0.57" data-track-index="10" data-volume="0.45"></audio>
+      <audio id="sfx-18" src="sfx/click.mp3" data-start="20.95" data-duration="0.37" data-track-index="12" data-volume="0.65"></audio>
+      <audio id="sfx-19" src="sfx/whoosh-short.mp3" data-start="21.35" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-20" src="sfx/pop.mp3" data-start="21.75" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-21" src="sfx/whoosh-short.mp3" data-start="23.75" data-duration="0.57" data-track-index="10" data-volume="0.3"></audio>
+      <audio id="sfx-22" src="sfx/pop.mp3" data-start="24.0" data-duration="0.72" data-track-index="11" data-volume="0.4"></audio>
+      <audio id="sfx-23" src="sfx/pop.mp3" data-start="25.82" data-duration="0.72" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sfx-24" src="sfx/riser.mp3" data-start="25.4" data-duration="1.2" data-media-start="8.83" data-track-index="13" data-volume="0.35"></audio>
+      <audio id="sfx-25" src="sfx/impact-bass-2.mp3" data-start="26.4" data-duration="2.4" data-media-start="0.2" data-track-index="14" data-volume="0.2"></audio>
+      <audio id="sfx-26" src="sfx/whoosh-short.mp3" data-start="27.15" data-duration="0.57" data-track-index="10" data-volume="0.3"></audio>
+      <audio id="sfx-27" src="sfx/click.mp3" data-start="29.7" data-duration="0.37" data-track-index="12" data-volume="0.6"></audio>
+      <audio id="sfx-28" src="sfx/whoosh.mp3" data-start="30.1" data-duration="0.57" data-track-index="10" data-volume="0.4"></audio>
+      <audio id="sfx-29" src="sfx/whoosh-short.mp3" data-start="30.62" data-duration="0.57" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sfx-30" src="sfx/whoosh-short.mp3" data-start="31.65" data-duration="0.57" data-track-index="12" data-volume="0.3"></audio>
+      <audio id="sfx-31" src="sfx/whoosh-short.mp3" data-start="32.85" data-duration="0.57" data-track-index="13" data-volume="0.3"></audio>
+      <audio id="sfx-32" src="sfx/click-soft.mp3" data-start="34.16" data-duration="0.37" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sfx-33" src="sfx/whoosh-short.mp3" data-start="35.1" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-34" src="sfx/pop.mp3" data-start="37.48" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-35" src="sfx/pop.mp3" data-start="38.25" data-duration="0.72" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sfx-36" src="sfx/pop.mp3" data-start="38.88" data-duration="0.72" data-track-index="13" data-volume="0.55"></audio>
+      <audio id="sfx-37" src="sfx/whoosh.mp3" data-start="40.05" data-duration="0.57" data-track-index="10" data-volume="0.45"></audio>
+      <audio id="sfx-38" src="sfx/pop.mp3" data-start="41.77" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-39" src="sfx/whoosh-short.mp3" data-start="42.9" data-duration="0.57" data-track-index="12" data-volume="0.3"></audio>
+      <audio id="sfx-40" src="sfx/sparkle.mp3" data-start="44.42" data-duration="1.8" data-track-index="13" data-volume="0.25"></audio>
+      <audio id="sfx-41" src="sfx/whoosh-short.mp3" data-start="45.45" data-duration="0.57" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="sfx-42" src="sfx/pop.mp3" data-start="45.97" data-duration="0.72" data-track-index="11" data-volume="0.45"></audio>
+      <audio id="sfx-43" src="sfx/click.mp3" data-start="47.17" data-duration="0.37" data-track-index="12" data-volume="0.7"></audio>
+      <audio id="sfx-44" src="sfx/sparkle.mp3" data-start="47.25" data-duration="1.8" data-track-index="13" data-volume="0.22"></audio>
+
+      <script src="vendor/gsap.min.js"></script>
+      <script src="vendor/motion-blur.js"></script>
+      <script>
+        (function () {
+          var FPS = 30, END = 49.1667;
+          var q = function (t) { return Math.round(t * FPS) / FPS; };
+          var tl = gsap.timeline({ paused: true });
+          var EASE = "power3.out", SMOOTH = "expo.out";
+
+          // ── helpers ────────────────────────────────────────────────
+          // overlay card: wrapper fade + card rises from below with blur on its text
+          function overlayIn(inSel, cardSel, t) {
+            tl.fromTo(inSel, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, q(t));
+            tl.fromTo(cardSel, { y: 120, scale: 0.92 }, { y: 0, scale: 1, duration: 0.7, ease: SMOOTH }, q(t));
+          }
+          function overlayOut(inSel, cardSel, t) {
+            tl.to(cardSel, { y: 60, scale: 0.96, duration: 0.3, ease: "power2.in" }, q(t));
+            tl.to(inSel, { opacity: 0, duration: 0.3, ease: "power2.in" }, q(t));
+          }
+          // B-roll: punch in from slightly zoomed + fade; leave by fading out
+          function brollIn(id, t) {
+            tl.fromTo("#" + id + "-in", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.45, ease: SMOOTH }, q(t));
+          }
+          function brollOut(id, t) {
+            tl.to("#" + id + "-in", { opacity: 0, scale: 0.97, duration: 0.25, ease: "power2.in" }, q(t));
+          }
+          function popIn(sel, t, from) {
+            tl.fromTo(sel, { opacity: 0, scale: from || 0.4 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, q(t));
+          }
+          // text rise with a focus pull (blur → sharp)
+          function riseIn(sel, t, dist, dur) {
+            tl.fromTo(sel, { opacity: 0, y: dist || 60, filter: "blur(14px)" },
+              { opacity: 1, y: 0, filter: "blur(0px)", duration: dur || 0.6, ease: SMOOTH }, q(t));
+          }
+          function drift(sel, t, dur, dx, dy) {
+            tl.fromTo(sel, { x: 0, y: 0 }, { x: dx, y: dy, duration: dur, ease: "sine.inOut" }, q(t));
+          }
+          function drawPath(sel, t, dur, ease) {
+            var el = document.querySelector(sel);
+            var L = el.getTotalLength();
+            tl.fromTo(sel, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: dur, ease: ease || "power2.inOut" }, q(t));
+          }
+
+          // ── video framing: smooth punch-ins on the talking head ────
+          tl.set("#video-wrap", { transformOrigin: "50% 32%" }, 0);
+          tl.fromTo("#video-wrap", { scale: 1 }, { scale: 1.06, duration: 0.8, ease: "power2.inOut" }, q(2.5));
+          tl.to("#video-wrap", { scale: 1.0, duration: 0.01 }, q(8.4));
+          tl.to("#video-wrap", { scale: 1.05, duration: 2.0, ease: "sine.inOut" }, q(8.45));
+          tl.to("#video-wrap", { scale: 1.0, duration: 0.01 }, q(12.75));
+          tl.to("#video-wrap", { scale: 1.13, duration: 0.35, ease: "power3.out" }, q(16.41));
+          tl.to("#video-wrap", { scale: 1.0, duration: 0.01 }, q(21.45));
+          tl.to("#video-wrap", { scale: 1.06, duration: 4.8, ease: "sine.inOut" }, q(21.5));
+          tl.to("#video-wrap", { scale: 1.0, duration: 0.01 }, q(35.2));
+          tl.to("#video-wrap", { scale: 1.07, duration: 4.6, ease: "sine.inOut" }, q(35.25));
+          tl.to("#video-wrap", { scale: 1.0, duration: 0.01 }, q(45.6));
+          tl.to("#video-wrap", { scale: 1.08, duration: 3.5, ease: "sine.inOut" }, q(45.62));
+
+          // ── O1 · hook ──────────────────────────────────────────────
+          tl.fromTo("#o1-in", { opacity: 0 }, { opacity: 1, duration: 0.2 }, q(0.5));
+          tl.fromTo("#o1-card", { x: -1100 }, { x: 0, duration: 0.6, ease: SMOOTH }, q(0.5));
+          tl.fromTo("#o1-badge", { opacity: 0, scale: 0, rotation: -25 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: "back.out(2.2)" }, q(1.5));
+          tl.to("#o1-badge", { y: -14, duration: 0.25, ease: "power2.out" }, q(1.9));
+          tl.to("#o1-badge", { y: 0, duration: 0.35, ease: "power2.in" }, q(2.15));
+          overlayOut("#o1-in", "#o1-card", 3.05);
+
+          // ── B1 · bills climb every month ───────────────────────────
+          (function buildBars() {
+            var bars = document.getElementById("b1-bars"), months = document.getElementById("b1-months");
+            var H = [28, 33, 31, 39, 45, 43, 52, 60, 64, 63, 76, 92], M = "JFMAMJJASOND";
+            for (var i = 0; i < 12; i++) {
+              var b = document.createElement("div");
+              b.id = "b1-bar-" + i;
+              b.style.cssText = "position:absolute;bottom:0;left:" + (i * 66 + 6) + "px;width:50px;height:" + Math.round(H[i] * 3.3) + "px;border-radius:14px 14px 6px 6px;transform-origin:50% 100%;" +
+                (i === 11 ? "background:linear-gradient(180deg,#f2bb46,#d99a1e);box-shadow:0 0 30px rgba(242,187,70,0.7);"
+                          : "background:linear-gradient(180deg,rgba(93,165,209,0.95),rgba(49,88,125,0.85));border:1.5px solid rgba(247,245,229,0.35);");
+              bars.appendChild(b);
+              var m = document.createElement("div");
+              m.style.cssText = "position:absolute;top:0;left:" + (i * 66 + 6) + "px;width:50px;text-align:center;font-weight:700;font-size:26px;color:rgba(247,245,229,0.7);";
+              m.textContent = M[i];
+              months.appendChild(m);
+            }
+          })();
+          brollIn("b1", 3.6);
+          drift("#b1-blob1", 3.6, 4.75, 120, 80);
+          drift("#b1-blob2", 3.6, 4.75, -100, -120);
+          popIn("#b1-chip", 3.85, 0.6);
+          riseIn("#b1-small", 5.5, 50);
+          tl.fromTo("#b1-big", { opacity: 0, y: 140, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: SMOOTH }, q(6.45));
+          tl.fromTo("#b1-chart", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: 0.7, ease: SMOOTH }, q(5.6));
+          for (var i = 0; i < 12; i++) {
+            tl.fromTo("#b1-bar-" + i, { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "back.out(1.4)" }, q(6.0 + i * 0.12));
+          }
+          popIn("#b1-every", 7.8, 0.3);
+          brollOut("b1", 8.1);
+
+          // ── O2 · not your usage ────────────────────────────────────
+          overlayIn("#o2-in", "#o2-card", 8.45);
+          tl.fromTo("#o2-strike", { width: 0 }, { width: 560, duration: 0.45, ease: "power3.inOut" }, q(9.05));
+          overlayOut("#o2-in", "#o2-card", 10.45);
+
+          // ── B2 · rates keep RISING ─────────────────────────────────
+          brollIn("b2", 10.8);
+          drift("#b2-blob1", 10.8, 1.95, -80, 90);
+          riseIn("#b2-small", 10.95, 40, 0.5);
+          tl.fromTo("#b2-chart", { opacity: 0, y: 140 }, { opacity: 1, y: 0, duration: 0.55, ease: SMOOTH }, q(10.85));
+          drawPath("#b2-line", 11.1, 1.0, "power2.in");
+          tl.fromTo("#b2-area", { opacity: 0 }, { opacity: 1, duration: 0.5 }, q(11.6));
+          tl.fromTo("#b2-arrow", { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, q(12.07));
+          // the slam: drops in fast from above, lands sharp on "rising" (motion-blurred)
+          tl.fromTo("#b2-rising", { opacity: 0, y: -520, scale: 1.35 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power4.out" }, q(11.85));
+          tl.fromTo("#b2-chart", { x: 0 }, { keyframes: [{ x: -14, duration: 0.05 }, { x: 12, duration: 0.05 }, { x: -6, duration: 0.05 }, { x: 0, duration: 0.05 }] }, q(12.12));
+          brollOut("b2", 12.5);
+
+          // ── O3 · fixed income / budget / adds up fast ──────────────
+          tl.fromTo("#o3-c1", { opacity: 0, x: -200, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.65, ease: SMOOTH }, q(13.2));
+          tl.fromTo("#o3-c2", { opacity: 0, x: 200, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.65, ease: SMOOTH }, q(13.94));
+          tl.to(["#o3-c1", "#o3-c2"], { opacity: 0, y: 40, duration: 0.3, ease: "power2.in", stagger: 0.06 }, q(15.95));
+          ["#o3-p1", "#o3-p2", "#o3-p3"].forEach(function (s, i) {
+            tl.fromTo(s, { opacity: 0, y: -260, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, q([16.41, 16.68, 16.86][i] - 0.12));
+          });
+          tl.to(["#o3-p1", "#o3-p2", "#o3-p3"], { opacity: 0, scale: 0.9, duration: 0.25, ease: "power2.in" }, q(17.25));
+
+          // ── B3 · you don't have to accept rate hikes ───────────────
+          brollIn("b3", 17.55);
+          drift("#b3-blob1", 17.55, 3.85, 140, 60);
+          drift("#b3-blob2", 17.55, 3.85, -120, -80);
+          tl.fromTo("#b3-card", { opacity: 0, y: 200, rotationX: 18, transformPerspective: 1600 }, { opacity: 1, y: 0, rotationX: 0, duration: 0.8, ease: SMOOTH }, q(17.6));
+          riseIn("#b3-l1", 19.37, 70, 0.55);
+          riseIn("#b3-l2", 19.65, 70, 0.55);
+          riseIn("#b3-l3", 20.0, 70, 0.55);
+          riseIn("#b3-l4", 20.62, 70, 0.55);
+          tl.fromTo("#b3-toggle-wrap", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: SMOOTH }, q(18.9));
+          tl.fromTo("#b3-knob", { x: 0 }, { x: -96, duration: 0.3, ease: "power3.inOut" }, q(20.92));
+          tl.fromTo("#b3-track", { backgroundColor: "#f2bb46" }, { backgroundColor: "rgba(247,245,229,0.18)", duration: 0.3 }, q(20.92));
+          brollOut("b3", 21.2);
+
+          // ── O4 · available for years → homeowners choosing it ──────
+          (function buildPeople() {
+            var host = document.getElementById("o4-people");
+            for (var i = 0; i < 14; i++) {
+              var col = i % 7, row = Math.floor(i / 7);
+              var p = document.createElement("div");
+              p.id = "o4-p-" + i;
+              var c = (i % 3 === 0) ? "#f2bb46" : (i % 3 === 1 ? "#5da5d1" : "#f7f5e5");
+              p.style.cssText = "position:absolute;left:" + (col * 114 + 4) + "px;top:" + (row * 92) + "px;width:90px;height:86px;";
+              p.innerHTML = '<svg viewBox="0 0 64 64" style="width:90px;height:86px"><circle cx="32" cy="18" r="11" fill="' + c + '"/><path d="M12 58c0-13 9-21 20-21s20 8 20 21z" fill="' + c + '" opacity="0.85"/></svg>';
+              host.appendChild(p);
+            }
+          })();
+          tl.fromTo("#o4-chip", { opacity: 0, y: 100, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: SMOOTH }, q(21.7));
+          tl.to("#o4-chip", { opacity: 0, y: -60, duration: 0.3, ease: "power2.in" }, q(23.55));
+          tl.fromTo("#o4-card", { opacity: 0, y: 120, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: SMOOTH }, q(23.75));
+          for (var k = 0; k < 14; k++) {
+            tl.fromTo("#o4-p-" + k, { opacity: 0, scale: 0, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(2)" }, q(24.0 + k * 0.06));
+          }
+          popIn("#o4-now", 25.82, 0.5);
+          tl.to("#o4-card", { opacity: 0, y: 60, duration: 0.3, ease: "power2.in" }, q(26.2));
+
+          // ── B4 · SOLAR ─────────────────────────────────────────────
+          brollIn("b4", 26.45);
+          tl.fromTo("#b4-solar", { opacity: 0, scale: 2.6, y: 120 }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: "power4.out" }, q(26.5));
+          drift("#b4-sunglow", 26.45, 3.7, 60, -40);
+          riseIn("#b4-sub", 27.18, 40, 0.55);
+          popIn("#b4-sun", 27.0, 0.3);
+          popIn("#b4-house", 27.25, 0.3);
+          popIn("#b4-tower", 27.5, 0.3);
+          tl.fromTo("#b4-sun", { rotation: 0 }, { rotation: 20, duration: 3.0, ease: "none" }, q(27.0));
+          drawPath("#b4-flow", 27.7, 0.55, "power2.out");
+          tl.fromTo("#b4-flow", { strokeDashoffset: 0 }, { strokeDashoffset: -120, duration: 2.4, ease: "none", immediateRender: false }, q(28.25));
+          tl.set("#b4-flow", { strokeDasharray: "4 26" }, q(28.25));
+          drawPath("#b4-gridline", 27.75, 0.55, "power2.out");
+          riseIn("#b4-lbl1", 27.84, 30, 0.45);
+          riseIn("#b4-lbl2", 28.6, 30, 0.45);
+          tl.to("#b4-gridline", { opacity: 0.2, duration: 0.5 }, q(29.2));
+          tl.to("#b4-tower", { opacity: 0.45, scale: 0.92, duration: 0.5 }, q(29.2));
+          tl.fromTo("#b4-x", { opacity: 0, scale: 0, rotation: -90 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)" }, q(29.65));
+          brollOut("b4", 29.9);
+
+          // ── B5 · three benefits ────────────────────────────────────
+          brollIn("b5", 30.15);
+          drift("#b5-blob1", 30.15, 4.95, 140, 160);
+          drift("#b5-blob2", 30.15, 4.95, -120, -100);
+          riseIn("#b5-head", 30.2, 50, 0.6);
+          [["#b5-c1", 30.62], ["#b5-c2", 31.65], ["#b5-c3", 32.85]].forEach(function (c) {
+            tl.fromTo(c[0], { opacity: 0, x: 1000 }, { opacity: 1, x: 0, duration: 0.55, ease: SMOOTH }, q(c[1]));
+          });
+          tl.fromTo("#b5-under", { width: 0 }, { width: 520, duration: 0.6, ease: "power3.inOut" }, q(34.16));
+          brollOut("b5", 34.85);
+
+          // ── O6 · no loans / debt / down payment ────────────────────
+          overlayIn("#o6-in", "#o6-card", 35.25);
+          [["#o6-r1", 37.4], ["#o6-r2", 38.17], ["#o6-r3", 38.8]].forEach(function (r) {
+            tl.fromTo(r[0], { opacity: 0, x: -80, filter: "blur(10px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.5, ease: SMOOTH }, q(r[1]));
+            tl.fromTo(r[0] + " > div:first-child", { scale: 0, rotation: -60 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.4)" }, q(r[1] + 0.05));
+          });
+          overlayOut("#o6-in", "#o6-card", 39.7);
+
+          // ── B6 · free consultation ─────────────────────────────────
+          brollIn("b6", 40.15);
+          drift("#b6-blob1", 40.15, 5.35, -140, 120);
+          drift("#b6-blob2", 40.15, 5.35, 160, -100);
+          popIn("#b6-step", 40.35, 0.5);
+          tl.fromTo("#b6-free", { opacity: 0, y: 120, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: SMOOTH }, q(41.72));
+          riseIn("#b6-consult", 41.96, 50, 0.6);
+          tl.fromTo("#b6-card", { opacity: 0, y: 180 }, { opacity: 1, y: 0, duration: 0.7, ease: SMOOTH }, q(42.6));
+          tl.fromTo("#b6-paper", { y: 60 }, { y: 0, duration: 0.6, ease: "back.out(1.6)" }, q(42.95));
+          tl.fromTo("#b6-scan", { y: 0 }, { y: 150, duration: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1 }, q(43.2));
+          riseIn("#b6-t1", 42.97, 40, 0.55);
+          tl.fromTo("#b6-t2", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: SMOOTH }, q(44.42));
+          tl.fromTo(["#b6-s1", "#b6-s2"], { opacity: 0, scale: 0, rotation: -45 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.5)", stagger: 0.12 }, q(44.6));
+          brollOut("b6", 45.3);
+
+          // ── O7 · CTA ───────────────────────────────────────────────
+          overlayIn("#o7-in", "#o7-card", 45.6);
+          tl.fromTo("#o7-btn", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.7)" }, q(45.95));
+          tl.fromTo("#o7-cursor", { opacity: 0, x: 260, y: 220 }, { opacity: 1, x: 0, y: 0, duration: 0.01 }, q(46.3));
+          tl.fromTo("#o7-cursor", { x: 260, y: 220 }, { x: -40, y: -95, duration: 0.75, ease: "power3.inOut", immediateRender: false }, q(46.35));
+          tl.to("#o7-cursor", { scale: 0.85, duration: 0.08, transformOrigin: "20% 10%" }, q(47.14));
+          tl.to("#o7-cursor", { scale: 1, duration: 0.15 }, q(47.22));
+          tl.to("#o7-btn", { scale: 0.94, duration: 0.08, ease: "power2.out" }, q(47.15));
+          tl.to("#o7-btn", { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.45)" }, q(47.23));
+          tl.fromTo("#o7-ripple", { opacity: 0.9, scale: 0.3 }, { opacity: 0, scale: 6, duration: 0.7, ease: "power2.out" }, q(47.18));
+          tl.fromTo("#o7-tag", { opacity: 0, y: 40, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: SMOOTH }, q(47.62));
+
+          // ── captions: word-level karaoke chunks ────────────────────
+          var WORDS = [["Your",0.09,0.23],["electric",0.23,0.7],["bill",0.7,0.93],["just",0.93,1.16],["went",1.16,1.38],["up",1.38,1.5],["again,",1.5,1.9],["right?",1.9,2.53],["You're",2.53,2.89],["not",2.89,3.13],["alone.",3.13,3.83],["Bakersfield",3.83,4.42],["homeowners",4.42,4.92],["are",4.92,5.07],["seeing",5.07,5.36],["their",5.36,5.54],["PG&E",5.54,6.27],["bills",6.27,6.53],["climb",6.53,6.88],["every",6.88,7.3],["single",7.3,7.82],["month.",7.82,8.61],["The",8.61,8.68],["problem",8.68,9.05],["isn't",9.05,9.31],["that",9.31,9.55],["you're",9.55,9.83],["using",9.83,10.09],["more",10.09,10.29],["power.",10.29,10.85],["It's",10.85,11.06],["that",11.06,11.4],["rates",11.4,11.79],["keep",11.79,12.07],["rising.",12.07,12.65],["And",12.65,12.7],["if",12.7,12.79],["you're",12.79,13.07],["on",13.07,13.12],["a",13.12,13.2],["fixed",13.2,13.44],["income",13.44,13.85],["or",13.85,13.94],["watching",13.94,14.44],["your",14.44,14.81],["budget,",14.81,15.21],["those",15.21,15.57],["increases",15.57,16.41],["add",16.41,16.68],["up",16.68,16.86],["fast.",16.86,17.63],["Here's",17.63,17.82],["what",17.82,18.01],["most",18.01,18.2],["people",18.2,18.49],["don't",18.49,18.72],["realize:",18.72,19.37],["you",19.37,19.45],["don't",19.45,19.73],["have",19.73,19.95],["to",19.95,20.06],["accept",20.06,20.4],["those",20.4,20.68],["rate",20.68,20.9],["hikes.",20.9,21.49],["There's",21.49,21.67],["an",21.67,21.75],["option",21.75,22.04],["that's",22.04,22.21],["been",22.21,22.37],["available",22.37,22.78],["for",22.78,23.07],["years,",23.07,23.69],["and",23.69,23.74],["more",23.74,23.93],["Bakersfield",23.93,24.43],["homeowners",24.43,24.94],["are",24.94,25.13],["choosing",25.13,25.61],["it",25.61,25.82],["right",25.82,26.1],["now.",26.1,26.61],["Solar",26.61,26.8],["lets",26.8,27.02],["you",27.02,27.18],["generate",27.18,27.62],["your",27.62,27.84],["own",27.84,28.0],["power",28.0,28.41],["instead",28.41,28.68],["of",28.68,28.78],["buying",28.78,29.09],["it",29.09,29.19],["all",29.19,29.35],["from",29.35,29.61],["the",29.61,29.7],["grid.",29.7,30.17],["That",30.17,30.34],["means",30.34,30.72],["lower",30.72,31.0],["bills,",31.0,31.48],["more",31.48,31.75],["predictability,",31.75,32.81],["and",32.81,32.92],["real",32.92,33.17],["control",33.17,33.64],["over",33.64,33.9],["your",33.9,34.16],["energy",34.16,34.53],["costs.",34.53,35.21],["And",35.21,35.33],["if",35.33,35.47],["you",35.47,35.68],["qualify,",35.68,36.32],["we",36.32,36.41],["can",36.41,36.55],["get",36.55,36.69],["you",36.69,36.84],["started",36.84,37.23],["with",37.23,37.48],["no",37.48,37.65],["loans,",37.65,38.25],["debt,",38.25,38.76],["or",38.76,38.88],["down",38.88,39.39],["payment.",39.39,40.25],["The",40.25,40.35],["first",40.35,40.68],["step",40.68,40.94],["is",40.94,41.07],["simple:",41.07,41.68],["a",41.68,41.77],["free",41.77,41.96],["consultation",41.96,42.71],["where",42.71,42.87],["we",42.87,42.97],["look",42.97,43.1],["at",43.1,43.16],["your",43.16,43.42],["specific",43.42,44.17],["bill",44.17,44.33],["and",44.33,44.42],["show",44.42,44.68],["you",44.68,44.88],["what's",44.88,45.2],["possible.",45.2,45.97],["Book",45.97,46.13],["that",46.13,46.38],["consultation",46.38,47.17],["today,",47.17,47.57],["and",47.57,47.66],["see",47.66,47.84],["what",47.84,48.12],["solar",48.12,48.37],["could",48.37,48.66],["do",48.66,48.78],["for",48.78,48.96],["your",48.96,49.2],["home.",49.2,49.64]];
+          // chunk: break after punctuation, at 3 words, or when the line gets long
+          var chunks = [], cur = [];
+          WORDS.forEach(function (w, i) {
+            cur.push(w);
+            var len = cur.map(function (x) { return x[0]; }).join(" ").length;
+            var next = WORDS[i + 1];
+            var punct = /[.,?!:]$/.test(w[0]);
+            if (!next || punct || cur.length >= 3 || len + (next ? next[0].length + 1 : 0) > 18) { chunks.push(cur); cur = []; }
+          });
+          var capHost = document.getElementById("captions");
+          chunks.forEach(function (ch, ci) {
+            var el = document.createElement("div");
+            el.className = "cap"; el.id = "cap-" + ci;
+            var pill = document.createElement("div"); pill.className = "pill";
+            ch.forEach(function (w, wi) {
+              var s = document.createElement("span");
+              s.className = "w"; s.id = "cap-" + ci + "-" + wi;
+              s.textContent = w[0].replace(/[,.:]$/, "");
+              pill.appendChild(s);
+            });
+            el.appendChild(pill); capHost.appendChild(el);
+            var start = ch[0][1];
+            var nextStart = chunks[ci + 1] ? chunks[ci + 1][0][1] : END;
+            var end = Math.min(END, nextStart - start < 1.0 ? nextStart : ch[ch.length - 1][2] + 0.25);
+            tl.fromTo("#cap-" + ci, { opacity: 0 }, { opacity: 1, duration: 0.01 }, q(Math.max(0, start - 0.05)));
+            tl.fromTo("#cap-" + ci + " .pill", { scale: 0.85, y: 20 }, { scale: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, q(Math.max(0, start - 0.05)));
+            tl.fromTo("#cap-" + ci + " .w", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out", stagger: 0.045 }, q(Math.max(0, start - 0.05)));
+            ch.forEach(function (w, wi) {
+              var sel = "#cap-" + ci + "-" + wi;
+              tl.fromTo(sel, { color: "#f7f5e5", scale: 1 }, { color: "#f2bb46", scale: 1.1, duration: 0.1, ease: "power2.out", immediateRender: false }, q(w[1]));
+              var off = wi < ch.length - 1 ? ch[wi + 1][1] : end - 0.02;
+              if (wi < ch.length - 1) tl.to(sel, { color: "#f7f5e5", scale: 1, duration: 0.1 }, q(off));
+            });
+            tl.to("#cap-" + ci, { opacity: 0, duration: 0.08 }, q(end - 0.08));
+          });
+
+          window.__timelines["bakersfield-solar"] = tl;
+        })();
+      </script>
+    </div>
+  </body>
+</html>
